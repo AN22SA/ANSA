@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online PDF Page Flip Book</title>
+    <!-- Include Turn.js CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f2f2f2;
+        }
+
+        #flipbook {
+            width: 800px;
+            height: 600px;
+            margin: 20px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .contact-us {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="flipbook"></div>
+
+    <div class="contact-us">
+        <p>Contact us for a hard copy: <a href="mailto:example@example.com">example@example.com</a></p>
+    </div>
+
+    <!-- Include jQuery (required for Turn.js) -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Include PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+    <!-- Include Turn.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/4.1.0/turn.min.js"></script>
+
+    <script>
+        const url = 'https://drive.google.com/uc?export=download&id=1_9hG3RSgh6wGlpdBd-VIkyy45zrWQLHp'; // Replace with your Google Drive direct link
+
+        // Function to render PDF pages
+        async function renderPDF(url) {
+            const pdf = await pdfjsLib.getDocument(url).promise;
+            const pages = pdf.numPages;
+
+            for (let i = 1; i <= pages; i++) {
+                const canvas = document.createElement('canvas');
+                canvas.classList.add('page');
+                $('#flipbook').append(canvas);
+
+                const page = await pdf.getPage(i);
+                const viewport = page.getViewport({ scale: 1 });
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                const context = canvas.getContext('2d');
+                page.render({ canvasContext: context, viewport: viewport });
+            }
+
+            $('#flipbook').turn({
+                width: 800,
+                height: 600,
+                autoCenter: true,
+            });
+        }
+
+        // Initialize PDF.js
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js';
+        renderPDF(url);
+    </script>
+</body>
+</html>
